@@ -12,90 +12,74 @@ d3.json("data/samples.json").then((importedData) => {
 
     // insert the ids as options in the dropdown menu
     subjectID.forEach(subject => {
-            let option = menu.append('option');
+            const option = menu.append('option');
             option.text(`${subject}`);
         });
 });
 
-// init function defines the initial aspect of the page
+// define the initial aspect of the page
 function init(){
     // Use D3 fetch to read the json file
     d3.json("data/samples.json").then((importedData) => {
         const data = importedData;
     
-    // Grab the metadata to add to the demographic info panel
+    // Demographic info
     const metadata = data.metadata.filter(subjectID => subjectID.id == '940');    
+    const info = Object.entries(metadata[0]); // extract the key:value pairs from the metadata
+    const reformatedInfo = info.map(entry => entry.join(': ')); // reformat the info
+    const panel = d3.select('#sample-metadata').append('ul'); // create a list to host subject's data
 
-    // extract the key:value pairs from the metadata
-    const info = Object.entries(metadata[0]);
+        // append demographic info to metadata panel
+        reformatedInfo.forEach(item => {
+            let x = panel.append('li');
+            x.text(`${item}`);
+        })
 
-    // reformat the info
-    const reformatedInfo = info.map(entry => entry.join(': '));
-
-    // get a handle on the html tag for the sample metadata and add a list tag
-    const panel = d3.select('#sample-metadata').append('ul');
-
-    // append demographic info to metadata panel
-    reformatedInfo.forEach(item => {
-        let x = panel.append('li');
-        x.text(`${item}`);
-    })
-
-    // Grab the values from the response json object to build the plot
+    // bar chart
     const testSubject = data.samples.filter(sample => sample.id == '940');
     console.log(testSubject);
     const sampleValues = testSubject[0].sample_values;
     const otuIDs = testSubject[0].otu_ids;
-    const otuLabels = testSubject[0].otu_labels;
- 
-    // combine the otuIDs with the otuLabels
-    let joinedIDs = [];
+    const otuLabels = testSubject[0].otu_labels; 
+    
+    const joinedIDs = []; // combine the otuIDs with the otuLabels
     otuIDs.forEach((item, index) => {joinedIDs.push(`${item}-${otuLabels[index].split(";").pop()}`)});
-
-    // create an object with the IDs and sample values
-    let result = {};
+    
+    const result = {}; // create an object with the IDs and sample values
     joinedIDs.forEach((key, i) => result[key] = sampleValues[i]);
 
-    // create an array of the object entries
-    let entries = Object.entries(result);
+    const entries = Object.entries(result); // create an array of the object entries
+    const sorted = entries.sort((a,z)=>z[1]-a[1]); // sort the entries by value in descending order
+    const sliced = sorted.slice(0,10); // slice the top ten results
+    const reversed = sliced.reverse(); // reverse the order for the plot
 
-    // sort the entries by value in descending order
-    let sorted = entries.sort((a,z)=>z[1]-a[1]);
+    const x = reversed.map(item => item[1]); // define x and y coordinates for the bar plot
+    const y = reversed.map(item => item[0]);
 
-    // slice the top ten results
-    let sliced = sorted.slice(0,10);
-
-    // reverse the order for the plot
-    let reversed = sliced.reverse();
-
-    // define x and y coordinates for the bar plot
-    let x = reversed.map(item => item[1]);
-    let y = reversed.map(item => item[0]);
-
-    // create a trace object
-    const trace = {
-        type: 'bar',
-        x: x,
-        y: y,
-        orientation: 'h',
-        margin:{
-            l: 200,
-            r: 200,
-            t: 100,
-            b: 100
-        }
-    };
-    // define the layout for the bar plot
-    const layout = {
-        title: 'Top 10 Bacteria - Selected Subject'
-    };
-    // create the bar plot
-    Plotly.newPlot('bar1',[trace],layout);
-    })
+        // create a trace object
+        const trace = {
+            type: 'bar',
+            x: x,
+            y: y,
+            orientation: 'h',
+            margin:{
+                l: 200,
+                r: 200,
+                t: 100,
+                b: 100
+            }
+        };
+        // define the layout for the bar plot
+        const layout = {
+            title: 'Top 10 Bacteria - Selected Subject'
+        };
+        // create the bar plot
+        Plotly.newPlot('bar1',[trace],layout);
+        })
 }
 init();
 
-// the optionChanged function is an event handler
+// handle events associated with selections in the dropdown menu
 function optionChanged(){
     // use D3 to select the dropdown menu
     const dropdownMenu = d3.select('#selDataset');
@@ -107,83 +91,66 @@ function optionChanged(){
     buildPlot(subject);
 }
 
-// the buildPlot function creates a horizontal bar plot for the selected subject
+// build a horizontal bar chart with data from the selected subject
 function buildPlot(subject){
     // Use D3 fetch to read the json file
     d3.json("data/samples.json").then((importedData) => {
         const data = importedData;
 
-    // Grab the metadata to add to the demographic info panel
-    const metadata = data.metadata.filter(subjectID => subjectID.id == subject);    
+    // demographic info panel
+    const metadata = data.metadata.filter(subjectID => subjectID.id == subject); 
+    const info = Object.entries(metadata[0]); // extract the key:value pairs from the metadata
+    const reformatedInfo = info.map(entry => entry.join(': ')); // reformat the info  
+    d3.select('#sample-metadata>ul').remove(); // clear existing list
+    const panel = d3.select('#sample-metadata').append('ul'); // create a list to host subject's data
 
-    // extract the key:value pairs from the metadata
-    const info = Object.entries(metadata[0]);
+        // append demographic info to metadata panel
+        reformatedInfo.forEach(item => {
+            let x = panel.append('li');
+            x.text(`${item}`);
+        })
 
-    // reformat the info
-    const reformatedInfo = info.map(entry => entry.join(': '));
-
-    // clear existing list
-    d3.select('#sample-metadata>ul').remove();
-
-    // get a handle on the html tag for the sample metadata and add a list tag
-    const panel = d3.select('#sample-metadata').append('ul');
-
-    // append demographic info to metadata panel
-    reformatedInfo.forEach(item => {
-        let x = panel.append('li');
-        x.text(`${item}`);
-    })
-    // Grab the values from the response json object to build the plot
+    // bar chart
     const testSubject = data.samples.filter(sample => sample.id == subject);
     console.log(testSubject);
     const sampleValues = testSubject[0].sample_values;
     const otuIDs = testSubject[0].otu_ids;
     const otuLabels = testSubject[0].otu_labels;
- 
-    // combine the otuIDs with the otuLabels
-    let joinedIDs = [];
+    
+    const joinedIDs = []; // combine the otuIDs with the otuLabels
     otuIDs.forEach((item, index) => {joinedIDs.push(`${item}-${otuLabels[index].split(";").pop()}`)});
 
-    // create an object with the IDs and sample values
-    let result = {};
-    joinedIDs.forEach((key, i) => result[key] = sampleValues[i]);
+    const result = {}; // create an object with the IDs and sample values
+    joinedIDs.forEach((key, i) => result[key] = sampleValues[i]);    
+    const entries = Object.entries(result); // create an array of the object entries    
+    const sorted = entries.sort((a,z)=>z[1]-a[1]); // sort the entries by value in descending order
+    const sliced = sorted.slice(0,10); // slice the top ten results
+    const reversed = sliced.reverse(); // reverse the order for the plot
 
-    // create an array of the object entries
-    let entries = Object.entries(result);
+    
+    const x = reversed.map(item => item[1]); // define x and y coordinates for the bar plot
+    const y = reversed.map(item => item[0]);
 
-    // sort the entries by value in descending order
-    let sorted = entries.sort((a,z)=>z[1]-a[1]);
-
-    // slice the top ten results
-    let sliced = sorted.slice(0,10);
-
-    // reverse the order for the plot
-    let reversed = sliced.reverse();
-
-    // define x and y coordinates for the bar plot
-    let x = reversed.map(item => item[1]);
-    let y = reversed.map(item => item[0]);
-
-    // create a trace object
-    const trace = {
-        type: 'bar',
-        x: x,
-        y: y,
-        orientation: 'h',
-        margin:{
-            l: 200,
-            r: 200,
-            t: 100,
-            b: 100
-        }
-    };
-    // define the layout for the bar plot
-    const layout = {
-        title: 'Top 10 Bacteria - Selected Subject'
-    };
-    // create the bar plot
-    Plotly.newPlot('bar1',[trace],layout);
-    })
+        // create a trace object
+        const trace = {
+            type: 'bar',
+            x: x,
+            y: y,
+            orientation: 'h',
+            margin:{
+                l: 200,
+                r: 200,
+                t: 100,
+                b: 100
+            }
+        };
+        // define the layout for the bar plot
+        const layout = {
+            title: 'Top 10 Bacteria - Selected Subject'
+        };
+        // create the bar plot
+        Plotly.newPlot('bar1',[trace],layout);
+        })
 };
 // TODO:
 // revise the all subjects plot to aggregate the data
