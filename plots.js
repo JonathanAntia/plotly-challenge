@@ -41,8 +41,8 @@ function init(){
     const otuLabels = testSubject[0].otu_labels; 
     
     const joinedIDs = []; // combine the otuIDs with the otuLabels
-    otuIDs.forEach((item, index) => {joinedIDs.push(`${item}: ${otuLabels[index].split(";").pop()}`)});
-    
+    otuIDs.forEach((item, index) => {joinedIDs.push(`${item}: ${otuLabels[index]}`)});
+
     const result = {}; // create an object with the IDs and sample values
     joinedIDs.forEach((key, i) => result[key] = sampleValues[i]);
 
@@ -52,7 +52,12 @@ function init(){
     const reversed = sliced.reverse(); // reverse the order for the plot
 
     const x = reversed.map(item => item[1]); // define x and y coordinates for the bar plot
-    const y = reversed.map(item => item[0]);
+    const yFirstPart = reversed.map(item => item[0].split(":").slice(0,1));
+    const ySecondPart = reversed.map(item => item[0].split(":").pop().split(";").pop());
+    const y = [];
+    for (let i = 0; i < yFirstPart.length; i++){
+        y.push(`${yFirstPart[i]}: ${ySecondPart[i]}`)
+    }
 
         // create a trace object
         const trace = {
@@ -60,7 +65,7 @@ function init(){
             x: x,
             y: y,
             orientation: 'h',
-            // text: otuLabels
+            text: reversed.map(item => item[0].split(':').pop())
         };
         // define the layout for the bar plot
         const layout = {
@@ -114,7 +119,7 @@ function buildPlot(subject){
     const otuLabels = testSubject[0].otu_labels;
     
     const joinedIDs = []; // combine the otuIDs with the otuLabels
-    otuIDs.forEach((item, index) => {joinedIDs.push(`${item}: ${otuLabels[index].split(";").pop()}`)});
+    otuIDs.forEach((item, index) => {joinedIDs.push(`${item}: ${otuLabels[index]}`)});
 
     const result = {}; // create an object with the IDs and sample values
     joinedIDs.forEach((key, i) => result[key] = sampleValues[i]);
@@ -125,7 +130,12 @@ function buildPlot(subject){
 
     
     const x = reversed.map(item => item[1]); // define x and y coordinates for the bar plot
-    const y = reversed.map(item => item[0]);
+    const yFirstPart = reversed.map(item => item[0].split(":").slice(0,1));
+    const ySecondPart = reversed.map(item => item[0].split(":").pop().split(";").pop());
+    const y = [];
+    for (let i = 0; i < yFirstPart.length; i++){
+        y.push(`${yFirstPart[i]}: ${ySecondPart[i]}`)
+    }
 
         // create a trace object
         const trace = {
@@ -133,7 +143,7 @@ function buildPlot(subject){
             x: x,
             y: y,
             orientation: 'h',
-            // text: otuLabels
+            text: reversed.map(item => item[0].split(":").pop())
         };
         // define the layout for the bar plot
         const layout = {
@@ -160,7 +170,7 @@ d3.json("data/samples.json").then((importedData) => {
     let joinIDsAndLabels = [];
     ids.forEach((subject, info) => {
         subject.forEach((item,index)=>{
-            joinIDsAndLabels.push(`${item}: ${labels[info][index].split(";").pop()}`)});
+            joinIDsAndLabels.push(`${item}: ${labels[info][index]}`)});
     })
 
     // join all value arrays into one
@@ -190,7 +200,12 @@ d3.json("data/samples.json").then((importedData) => {
 
     // define x and y coordinates for the bar plot
     let x = reversed.map(item => item[1]);
-    let y = reversed.map(item => item[0]);
+    const yFirstPart = reversed.map(item => item[0].split(":").slice(0,1));
+    const ySecondPart = reversed.map(item => item[0].split(":").pop().split(";").pop());
+    const y = [];
+    for (let i = 0; i < yFirstPart.length; i++){
+        y.push(`${yFirstPart[i]}: ${ySecondPart[i]}`)
+    }
 
     // create a trace object
     const trace = {
@@ -198,6 +213,7 @@ d3.json("data/samples.json").then((importedData) => {
         x: x,
         y: y,
         orientation: 'h',
+        text: reversed.map(item => item[0].split(":").pop())
     };
     // define the layout for the bar plot
     const layout = {
