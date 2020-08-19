@@ -5,7 +5,6 @@ d3.json("data/samples.json").then((importedData) => {
 
     // grab all the ids from the json object
     const subjectID = data.samples.map(subject => subject.id);
-    console.log(subjectID);
 
     // get a handle on the html tag with the dropdown menu
     const menu = d3.select('#selDataset');
@@ -37,13 +36,12 @@ function init(){
 
     // bar chart
     const testSubject = data.samples.filter(sample => sample.id == '940');
-    console.log(testSubject);
     const sampleValues = testSubject[0].sample_values;
     const otuIDs = testSubject[0].otu_ids;
     const otuLabels = testSubject[0].otu_labels; 
     
     const joinedIDs = []; // combine the otuIDs with the otuLabels
-    otuIDs.forEach((item, index) => {joinedIDs.push(`${item}-${otuLabels[index].split(";").pop()}`)});
+    otuIDs.forEach((item, index) => {joinedIDs.push(`${item}: ${otuLabels[index].split(";").pop()}`)});
     
     const result = {}; // create an object with the IDs and sample values
     joinedIDs.forEach((key, i) => result[key] = sampleValues[i]);
@@ -62,16 +60,14 @@ function init(){
             x: x,
             y: y,
             orientation: 'h',
-            margin:{
-                l: 200,
-                r: 200,
-                t: 100,
-                b: 100
-            }
+            // text: otuLabels
         };
         // define the layout for the bar plot
         const layout = {
-            title: 'Top 10 Bacteria - Selected Subject'
+            title: 'Top 10 Bacteria - Selected Subject',
+            yaxis: {
+                automargin: true
+            }
         };
         // create the bar plot
         Plotly.newPlot('bar1',[trace],layout);
@@ -118,10 +114,10 @@ function buildPlot(subject){
     const otuLabels = testSubject[0].otu_labels;
     
     const joinedIDs = []; // combine the otuIDs with the otuLabels
-    otuIDs.forEach((item, index) => {joinedIDs.push(`${item}-${otuLabels[index].split(";").pop()}`)});
+    otuIDs.forEach((item, index) => {joinedIDs.push(`${item}: ${otuLabels[index].split(";").pop()}`)});
 
     const result = {}; // create an object with the IDs and sample values
-    joinedIDs.forEach((key, i) => result[key] = sampleValues[i]);    
+    joinedIDs.forEach((key, i) => result[key] = sampleValues[i]);
     const entries = Object.entries(result); // create an array of the object entries    
     const sorted = entries.sort((a,z)=>z[1]-a[1]); // sort the entries by value in descending order
     const sliced = sorted.slice(0,10); // slice the top ten results
@@ -137,30 +133,25 @@ function buildPlot(subject){
             x: x,
             y: y,
             orientation: 'h',
-            margin:{
-                l: 200,
-                r: 200,
-                t: 100,
-                b: 100
-            }
+            // text: otuLabels
         };
         // define the layout for the bar plot
         const layout = {
-            title: 'Top 10 Bacteria - Selected Subject'
+            title: 'Top 10 Bacteria - Selected Subject',
+            yaxis: {
+                automargin: true
+            }
         };
         // create the bar plot
         Plotly.newPlot('bar1',[trace],layout);
         })
 };
-// TODO:
-// revise the all subjects plot to aggregate the data
 
 // generate a plot including all subjects in the dataset
 // Use D3 fetch to read the json file
 d3.json("data/samples.json").then((importedData) => {
     const data = importedData;
     const samples = data.samples;
-    
     const values = samples.map(subject => subject.sample_values);
     const ids = samples.map(subject => subject.otu_ids);
     const labels = samples.map(subject => subject.otu_labels);
@@ -169,15 +160,21 @@ d3.json("data/samples.json").then((importedData) => {
     let joinIDsAndLabels = [];
     ids.forEach((subject, info) => {
         subject.forEach((item,index)=>{
-            joinIDsAndLabels.push(`${item}-${labels[info][index].split(";").pop()}`)});
+            joinIDsAndLabels.push(`${item}: ${labels[info][index].split(";").pop()}`)});
     })
-    
+
     // join all value arrays into one
     valueArr = values.flat();
 
-    // create an object with the IDs and sample values
+    // create an object with the IDs and sample values aggregated as sum
     let result = {};
-    joinIDsAndLabels.forEach((key, i) => result[key] = valueArr[i]);
+    joinIDsAndLabels.forEach((key, i) => {if (!(key in result)){
+        result[key] = valueArr[i]; }
+        else{
+            result[key] += valueArr[i];
+        }
+    });
+    console.log(result);
 
     // create an array of the object entries
     let entries = Object.entries(result);
@@ -201,17 +198,23 @@ d3.json("data/samples.json").then((importedData) => {
         x: x,
         y: y,
         orientation: 'h',
-        margin:{
-            l: 200,
-            r: 200,
-            t: 100,
-            b: 100
-        }
     };
     // define the layout for the bar plot
     const layout = {
-        title: 'Top 10 Bacteria - All Subjects'
+        title: 'Top 10 Bacteria - All Subjects',
+        yaxis: {
+            automargin: true
+        }
     };
     // create the bar plot
     Plotly.newPlot('bar2',[trace],layout);
 });    
+
+// TODO:
+// add full otu_labels as hover text to the chart for all subjects
+// make sure to get the labels that correspond with each id
+// create bubble plot
+// link bubble chart to drowpdown menu
+// add the bubble chart to the init function
+// check the genus for each sample
+// check the labels for the bar charts
