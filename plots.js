@@ -47,8 +47,7 @@ function init(){
     joinedIDs.forEach((key, i) => result[key] = sampleValues[i]);
 
     const entries = Object.entries(result); // create an array of the object entries
-    const sorted = entries.sort((a,z)=>z[1]-a[1]); // sort the entries by value in descending order
-    const sliced = sorted.slice(0,10); // slice the top ten results
+    const sliced = entries.slice(0,10); // slice the top ten results
     const reversed = sliced.reverse(); // reverse the order for the plot
 
     const x = reversed.map(item => item[1]); // define x and y coordinates for the bar plot
@@ -76,7 +75,60 @@ function init(){
         };
         // create the bar plot
         Plotly.newPlot('bar1',[trace],layout);
+
+    // bubble chart
+    let family = otuLabels.map(item => item.split(';').slice(0,5));
+    family = family.map(subArr => subArr.join(';')) 
+
+    let result2 = {}; // aggregate the sampleValue by joined ID
+    let count = {};
+    family.forEach((key, i) => {if (!(key in result2)){
+        result2[key] = sampleValues[i];
+        count[key] = 1;
+        }
+        else{
+            result2[key] += sampleValues[i];
+            count[key] += 1;
+        }
+    });
+
+    const entries2 = Object.entries(result2); // create an array of the object entries
+    const sortedEntries = entries2.sort((a,z)=> z[1]-a[1]); // sort the array values
+
+    const countEntries = Object.entries(count); // create an array of the count object entries
+    let matchingCounts =[]; // match the order of the count keys to the sortedEntries
+    sortedEntries.map(item => {
+        countEntries.map(elem => {
+            if (elem[0] === item[0]){
+                matchingCounts.push(elem);
+            }
         })
+    });
+
+    const x2 = entries2.map(item => item[1]); // define x and y coordinates for the bar plot
+    const y2 = entries2.map(item => item[0]);
+
+        // create a trace object
+        const trace2 = {
+            mode: 'markers',
+            marker: {
+                size: matchingCounts.map(item => item[1])
+            },
+            x: x2,
+            y: y2,
+            orientation: 'h',
+            text: entries2.forEach(item => item[0])
+        };
+        // define the layout for the bar plot
+        const layout2 = {
+            title: 'Count of Bacteria Family - Selected Subject',
+            yaxis: {
+                automargin: true
+            }
+        };
+        // create the bar plot
+        Plotly.newPlot('bubble',[trace2],layout2);
+            })
 }
 init();
 
@@ -113,7 +165,6 @@ function buildPlot(subject){
 
     // bar chart
     const testSubject = data.samples.filter(sample => sample.id == subject);
-    console.log(testSubject);
     const sampleValues = testSubject[0].sample_values;
     const otuIDs = testSubject[0].otu_ids;
     const otuLabels = testSubject[0].otu_labels;
@@ -123,9 +174,8 @@ function buildPlot(subject){
 
     const result = {}; // create an object with the IDs and sample values
     joinedIDs.forEach((key, i) => result[key] = sampleValues[i]);
-    const entries = Object.entries(result); // create an array of the object entries    
-    const sorted = entries.sort((a,z)=>z[1]-a[1]); // sort the entries by value in descending order
-    const sliced = sorted.slice(0,10); // slice the top ten results
+    const entries = Object.entries(result); // create an array of the object entries
+    const sliced = entries.slice(0,10); // slice the top ten results
     const reversed = sliced.reverse(); // reverse the order for the plot
 
     
@@ -184,22 +234,13 @@ d3.json("data/samples.json").then((importedData) => {
             result[key] += valueArr[i];
         }
     });
-    console.log(result);
-
-    // create an array of the object entries
-    let entries = Object.entries(result);
-
-    // sort the entries by value in descending order
-    let sorted = entries.sort((a,z)=>z[1]-a[1]);
-
-    // slice the top ten results
-    let sliced = sorted.slice(0,10);
-
-    // reverse the order for the plot
-    let reversed = sliced.reverse();
+    const entries = Object.entries(result); // create an array of the object entries    
+    const sorted = entries.sort((a,z)=>z[1]-a[1]); // sort the entries by value in descending order    
+    const sliced = sorted.slice(0,10); // slice the top ten results    
+    const reversed = sliced.reverse(); // reverse the order for the plot
 
     // define x and y coordinates for the bar plot
-    let x = reversed.map(item => item[1]);
+    const x = reversed.map(item => item[1]);
     const yFirstPart = reversed.map(item => item[0].split(":").slice(0,1));
     const ySecondPart = reversed.map(item => item[0].split(":").pop().split(";").pop());
     const y = [];
@@ -234,3 +275,65 @@ d3.json("data/samples.json").then((importedData) => {
 // add the bubble chart to the init function
 // check the genus for each sample
 // check the labels for the bar charts
+
+// Use D3 fetch to read the json file
+d3.json("data/samples.json").then((importedData) => {
+    const data = importedData;
+
+// bubble chart
+const testSubject = data.samples.filter(sample => sample.id == '940');
+const sampleValues = testSubject[0].sample_values;
+const otuLabels = testSubject[0].otu_labels; // const otuIDs = testSubject[0].otu_ids;
+
+// let family = otuLabels.map(item => item.split(';').slice(0,5));
+// family = family.map(subArr => subArr.join(';')) 
+
+// let result2 = {}; // aggregate the sampleValue by joined ID
+// let count = {};
+// family.forEach((key, i) => {if (!(key in result2)){
+//     result2[key] = sampleValues[i];
+//     count[key] = 1;
+//      }
+//     else{
+//         result2[key] += sampleValues[i];
+//         count[key] += 1;
+//     }
+// });
+
+// const entries2 = Object.entries(result2); // create an array of the object entries
+// const sortedEntries = entries2.sort((a,z)=> z[1]-a[1]); // sort the array values
+
+// const countEntries = Object.entries(count); // create an array of the count object entries
+// let matchingCounts =[]; // match the order of the count keys to the sortedEntries
+// sortedEntries.map(item => {
+//     countEntries.map(elem => {
+//         if (elem[0] === item[0]){
+//             matchingCounts.push(elem);
+//         }
+//     })
+// });
+
+// const x = entries2.map(item => item[1]); // define x and y coordinates for the bar plot
+// const y = entries2.map(item => item[0]);
+
+//     // create a trace object
+//     const trace2 = {
+//         mode: 'markers',
+//         marker: {
+//             size: matchingCounts.map(item => item[1])
+//         },
+//         x: x,
+//         y: y,
+//         orientation: 'h',
+//         text: entries2.forEach(item => item[0])
+//     };
+//     // define the layout for the bar plot
+//     const layout2 = {
+//         title: 'Count of Bacteria Family - Selected Subject',
+//         yaxis: {
+//             automargin: true
+//         }
+//     };
+//     // create the bar plot
+//     Plotly.newPlot('bubble',[trace2],layout2);
+    })
