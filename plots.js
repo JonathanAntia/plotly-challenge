@@ -70,11 +70,15 @@ function init(){
         const layout = {
             title: 'Top 10 Bacteria - Selected Subject',
             yaxis: {
-                automargin: true
+                automargin: true,
+                rangemode: 'tozero'
+            },
+            xaxis: {
+                rangemode: 'tozero'
             }
         };
         // create the bar plot
-        Plotly.newPlot('bar1',[trace],layout);
+        Plotly.newPlot('bar2',[trace],layout);
 
     // bubble chart
     let family = otuLabels.map(item => item.split(';').slice(0,5));
@@ -112,7 +116,7 @@ function init(){
         const trace2 = {
             mode: 'markers',
             marker: {
-                size: matchingCounts.map(item => item[1]*2)
+                size: matchingCounts.map(item => item[1])
             },
             x: x2,
             y: y2,
@@ -126,7 +130,7 @@ function init(){
                 automargin: true
             }
         };
-        // create the bar plot
+        // create the bubble plot
         Plotly.newPlot('bubble',[trace2],layout2);
             })
 }
@@ -203,7 +207,7 @@ function buildPlot(subject){
             }
         };
         // create the bar plot
-        Plotly.newPlot('bar1',[trace],layout);
+        Plotly.newPlot('bar2',[trace],layout);
 
     // bubble chart
     let family = otuLabels.map(item => item.split(';').slice(0,5));
@@ -252,10 +256,14 @@ function buildPlot(subject){
         const layout2 = {
             title: 'Count of Bacteria Family - Selected Subject',
             yaxis: {
-                automargin: true
+                automargin: true,
+                rangemode: 'tozero'
+            },
+            xaxis:{
+                rangemode: 'tozero'
             }
         };
-        // create the bar plot
+        // create the bubble plot
         Plotly.newPlot('bubble',[trace2],layout2);
     
         })
@@ -318,16 +326,5 @@ d3.json("data/samples.json").then((importedData) => {
         }
     };
     // create the bar plot
-    Plotly.newPlot('bar2',[trace],layout);
-});    
-
-// TODO:
-// add full otu_labels as hover text to the chart for all subjects
-// make sure to get the labels that correspond with each id
-// create bubble plot
-// link bubble chart to drowpdown menu
-// add the bubble chart to the init function
-// check the genus for each sample
-// check the labels for the bar charts
-// set the origin to zero for the bubble chart
-// add a legend for bubble size
+    Plotly.newPlot('bar1',[trace],layout);
+});
