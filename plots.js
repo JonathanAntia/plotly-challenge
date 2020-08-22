@@ -47,7 +47,8 @@ function init(){
     joinedIDs.forEach((key, i) => result[key] = sampleValues[i]);
 
     const entries = Object.entries(result); // create an array of the object entries
-    const sliced = entries.slice(0,10); // slice the top ten results
+    const sorted = entries.sort((a,z)=> z[1]-a[1]); // sort entries in descending order
+    const sliced = sorted.slice(0,10); // slice the top ten results
     const reversed = sliced.reverse(); // reverse the order for the plot
 
     const x = reversed.map(item => item[1]); // define x and y coordinates for the bar plot
@@ -109,8 +110,8 @@ function init(){
         })
     });
 
-    const x2 = entries2.map(item => item[1]); // define x and y coordinates for the bar plot
-    const y2 = entries2.map(item => item[0]);
+    const x2 = sortedEntries.map(item => item[1]); // define x and y coordinates for the bar plot
+    const y2 = sortedEntries.map(item => item[0]);
 
         // create a trace object
         const trace2 = {
@@ -121,7 +122,7 @@ function init(){
             x: x2,
             y: y2,
             orientation: 'h',
-            text: entries2.forEach(item => item[0])
+            text: sortedEntries.forEach(item => item[0])
         };
         // define the layout for the bar plot
         const layout2 = {
@@ -179,10 +180,10 @@ function buildPlot(subject){
     const result = {}; // create an object with the IDs and sample values
     joinedIDs.forEach((key, i) => result[key] = sampleValues[i]);
     const entries = Object.entries(result); // create an array of the object entries
-    const sliced = entries.slice(0,10); // slice the top ten results
+    const sorted = entries.sort((a,z)=> z[1]-a[1]) // sort the array of entries by values
+    const sliced = sorted.slice(0,10); // slice the top ten results
     const reversed = sliced.reverse(); // reverse the order for the plot
 
-    
     const x = reversed.map(item => item[1]); // define x and y coordinates for the bar plot
     const yFirstPart = reversed.map(item => item[0].split(":").slice(0,1));
     const ySecondPart = reversed.map(item => item[0].split(":").pop().split(";").pop());
@@ -238,8 +239,8 @@ function buildPlot(subject){
         })
     });
 
-    const x2 = entries2.map(item => item[1]); // define x and y coordinates for the bar plot
-    const y2 = entries2.map(item => item[0]);
+    const x2 = sortedEntries.map(item => item[1]); // define x and y coordinates for the bar plot
+    const y2 = sortedEntries.map(item => item[0]);
 
         // create a trace object
         const trace2 = {
@@ -250,7 +251,7 @@ function buildPlot(subject){
             x: x2,
             y: y2,
             orientation: 'h',
-            text: entries2.forEach(item => item[0])
+            text: sortedEntries.forEach(item => item[0])
         };
         // define the layout for the bar plot
         const layout2 = {
